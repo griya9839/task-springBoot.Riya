@@ -1,0 +1,4 @@
+Access the Endpoint
+You can now access the parsing service by visiting:
+
+http://localhost:8080/api/xml/parse

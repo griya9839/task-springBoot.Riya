@@ -1,0 +1,17 @@
+Project Structure
+Here’s how your folder structure should look:
+
+src
+├── main
+│   ├── java
+│   │   └── com
+│   │       └── example
+│   │           └── xmlparser
+│   │               ├── XmlParserApplication.java  <-- Main class
+│   │               ├── controller
+│   │               │   └── XMLParserController.java  <-- Controller
+│   │               └── service
+│   │                   └── XMLParserService.java   <-- Service
+│   ├── resources
+│   │   └── application.properties  <-- (Optional config)
+│   │   └── sample.xml  <-- XML file to parse

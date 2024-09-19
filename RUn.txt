@@ -1,0 +1,4 @@
+Run the Application
+Run the Spring Boot application using Gradle:
+
+./gradlew bootRun

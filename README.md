@@ -83,3 +83,26 @@ public class XmlParserController {
         return xmlParsingService.parseXml(filePath);
     }
 }
+
+
+
+
+package com.example.xmlparser;
+
+import com.example.xmlparser.service.XmlParsingService;
+import java.util.Map;
+
+public class XmlParserApplication {
+
+    public static void main(String[] args) {
+        XmlParsingService xmlParsingService = new XmlParsingService();
+        String xmlFilePath = "path_to_your_xml_file.xml"; // Replace with your actual XML file path
+
+        Map<String, String> parsedData = xmlParsingService.parseXml(xmlFilePath);
+
+        // Print the parsed key-value pairs
+        parsedData.forEach((key, value) -> {
+            System.out.println("Key: " + key + ", Value: " + value);
+        });
+    }
+}

@@ -58,3 +58,28 @@ public class XmlParsingService {
         return keyValueMap;
     }
 }
+
+
+
+
+package com.example.xmlparser.controller;
+
+import com.example.xmlparser.service.XmlParsingService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
+
+@RestController
+public class XmlParserController {
+
+    @Autowired
+    private XmlParsingService xmlParsingService;
+
+    @GetMapping("/parse-xml")
+    public Map<String, String> parseXml(@RequestParam String filePath) {
+        return xmlParsingService.parseXml(filePath);
+    }
+}

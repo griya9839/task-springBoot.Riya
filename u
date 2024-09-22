@@ -101,3 +101,14 @@ public class XMLParserController {
 
 
 
+
+
+package com.example.demo.service;
+
+import java.util.Map;
+
+public interface XMLParserService {
+    Map<String, String> parseXMLFromResources(String fileName);
+}
+
+

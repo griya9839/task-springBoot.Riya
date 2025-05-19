@@ -2,3 +2,34 @@ Run the Application
 Run the Spring Boot application using Gradle:
 
 ./gradlew bootRun
+
+
+
+private static final ObjectMapper objectMapper = new ObjectMapper();
+
+private static List<List<String>> parseNestedArray(String input) {
+    List<List<String>> result = new ArrayList<>();
+
+    if (input == null || input.trim().isEmpty() || input.equals("[]")) return result;
+
+    try {
+        input = input.trim();
+
+        // Remove wrapping quotes if present
+        if (input.startsWith("\"") && input.endsWith("\"")) {
+            input = input.substring(1, input.length() - 1);
+        }
+
+        result = objectMapper.readValue(input, new TypeReference<List<List<String>>>() {});
+    } catch (Exception e) {
+        System.out.println("Parse failed for input: " + input);
+        e.printStackTrace();
+    }
+
+    return result;
+}
+
+
+private static String safe(List<String> list, int index) {
+    return (list != null && index < list.size()) ? list.get(index).trim() : "";
+}

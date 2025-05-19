@@ -136,3 +136,127 @@ public class MRMExporterFinal {
         return header.toArray(new String[0]);
     }
 }
+
+
+
+
+
+import java.io.; import java.sql.; import java.util.; import org.apache.commons.csv.;
+
+public class RiskDataExporterFinal {
+
+private static final List<String> COMMON_COLUMNS = Arrays.asList("site", "asset_class", "cob_date", "risk_source_id", "pts_source_id",
+        "pts_leg_id", "scenario_set_id", "model", "currency_pair", "job_uuid", "unit");
+
+public static void main(String[] args) throws Exception {
+    Connection conn = DriverManager.getConnection("jdbc:your-db-url", "username", "password");
+    Statement stmt = conn.createStatement();
+    ResultSet rs = stmt.executeQuery("SELECT * FROM your_table");
+
+    CSVPrinter irzPrinter = new CSVPrinter(new FileWriter("irz.csv"),
+            CSVFormat.DEFAULT.withHeader(buildHeader(COMMON_COLUMNS, Arrays.asList("tenor", "shift", "risk", "mrmUnit", "value"))));
+
+    CSVPrinter fxPrinter = new CSVPrinter(new FileWriter("fxdelta.csv"),
+            CSVFormat.DEFAULT.withHeader(buildHeader(COMMON_COLUMNS, Arrays.asList("column", "tenor", "value", "risk_factor", "unit"))));
+
+    CSVPrinter pvPrinter = new CSVPrinter(new FileWriter("pv.csv"),
+            CSVFormat.DEFAULT.withHeader(COMMON_COLUMNS.toArray(new String[0])));
+
+    while (rs.next()) {
+        Map<String, String> commonValues = new LinkedHashMap<>();
+        for (String col : COMMON_COLUMNS) {
+            commonValues.put(col, rs.getString(col));
+        }
+
+        boolean hasIRZ = rs.getString("irz.tenor") != null || rs.getString("irz.value") != null;
+        boolean hasFX = rs.getString("fxdelta.column") != null || rs.getString("fxdelta.value") != null;
+
+        if (hasIRZ) {
+            List<List<String>> tenors = parseNestedArray(rs.getString("irz.tenor"));
+            List<List<String>> values = parseNestedArray(rs.getString("irz.value"));
+            List<List<String>> units = parseNestedArray(rs.getString("irz.unit"));
+            List<List<String>> risks = parseNestedArray(rs.getString("irz.risk"));
+            List<List<String>> shifts = parseNestedArray(rs.getString("irz.shift"));
+
+            for (int i = 0; i < tenors.size(); i++) {
+                List<String> tList = tenors.get(i);
+                List<String> vList = i < values.size() ? values.get(i) : new ArrayList<>();
+                List<String> uList = i < units.size() ? units.get(i) : new ArrayList<>();
+                List<String> rList = i < risks.size() ? risks.get(i) : new ArrayList<>();
+                List<String> sList = i < shifts.size() ? shifts.get(i) : new ArrayList<>();
+
+                for (int j = 0; j < tList.size(); j++) {
+                    List<String> row = new ArrayList<>(commonValues.values());
+                    row.add(safe(tList, j));
+                    row.add(safe(sList, j));
+                    row.add(safe(rList, j));
+                    row.add(safe(uList, j));
+                    row.add(safe(vList, j));
+                    irzPrinter.printRecord(row);
+                }
+            }
+        }
+
+        if (hasFX) {
+            List<List<String>> columns = parseNestedArray(rs.getString("fxdelta.column"));
+            List<List<String>> tenors = parseNestedArray(rs.getString("fxdelta.tenor"));
+            List<List<String>> values = parseNestedArray(rs.getString("fxdelta.value"));
+            List<List<String>> risks = parseNestedArray(rs.getString("fxdelta.risk_factor"));
+            List<List<String>> units = parseNestedArray(rs.getString("fxdelta.unit"));
+
+            for (int i = 0; i < columns.size(); i++) {
+                List<String> cList = columns.get(i);
+                List<String> tList = i < tenors.size() ? tenors.get(i) : new ArrayList<>();
+                List<String> vList = i < values.size() ? values.get(i) : new ArrayList<>();
+                List<String> rList = i < risks.size() ? risks.get(i) : new ArrayList<>();
+                List<String> uList = i < units.size() ? units.get(i) : new ArrayList<>();
+
+                for (int j = 0; j < cList.size(); j++) {
+                    List<String> row = new ArrayList<>(commonValues.values());
+                    row.add(safe(cList, j));
+                    row.add(safe(tList, j));
+                    row.add(safe(vList, j));
+                    row.add(safe(rList, j));
+                    row.add(safe(uList, j));
+                    fxPrinter.printRecord(row);
+                }
+            }
+        }
+
+        if (!hasIRZ && !hasFX) {
+            pvPrinter.printRecord(commonValues.values());
+        }
+    }
+
+    irzPrinter.close();
+    fxPrinter.close();
+    pvPrinter.close();
+    conn.close();
+}
+
+private static List<List<String>> parseNestedArray(String input) {
+    List<List<String>> result = new ArrayList<>();
+    if (input == null || input.trim().isEmpty() || input.equals("[]")) return result;
+    input = input.trim().substring(1, input.length() - 1);
+    String[] groups = input.split("(?<=),\s*(?=");
+    for (String group : groups) {
+        group = group.replaceAll("[\"]", "").trim();
+        if (!group.isEmpty()) {
+            result.add(Arrays.asList(group.split("\s*,\s*")));
+        }
+    }
+    return result;
+}
+
+private static String safe(List<String> list, int index) {
+    return index < list.size() ? list.get(index).trim() : "";
+}
+
+private static String[] buildHeader(List<String> common, List<String> extras) {
+    List<String> header = new ArrayList<>(common);
+    header.addAll(extras);
+    return header.toArray(new String[0]);
+}
+
+}
+

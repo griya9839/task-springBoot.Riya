@@ -330,3 +330,10 @@ private static List<List<String>> parseNestedArray(String input) {
 
     return result;
 }
+
+
+
+
+private static String safe(List<String> list, int index) {
+    return (list != null && index < list.size()) ? list.get(index).trim() : "";
+}

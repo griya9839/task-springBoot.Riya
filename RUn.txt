@@ -33,3 +33,48 @@ private static List<List<String>> parseNestedArray(String input) {
 private static String safe(List<String> list, int index) {
     return (list != null && index < list.size()) ? list.get(index).trim() : "";
 }
+
+
+
+
+private static List<List<String>> parseNestedArray(String input) {
+    List<List<String>> result = new ArrayList<>();
+
+    if (input == null || input.trim().isEmpty() || input.equals("[]")) return result;
+
+    input = input.trim();
+
+    // Remove outer quotes if present (e.g., "\"[[USD],[JPY]]\"")
+    if (input.startsWith("\"") && input.endsWith("\"")) {
+        input = input.substring(1, input.length() - 1);
+    }
+
+    // Remove outer brackets
+    if (input.startsWith("[[") && input.endsWith("]]")) {
+        input = input.substring(2, input.length() - 2);
+    } else if (input.startsWith("[") && input.endsWith("]")) {
+        input = input.substring(1, input.length() - 1);
+    }
+
+    // ✅ This is the line you asked for:
+    String[] rows = input.split("\,\\s*\");
+
+    for (String row : rows) {
+        row = row.replace("[", "").replace("]", "");
+        String[] values = row.split("[,\\s]+");
+
+        List<String> parsedRow = new ArrayList<>();
+        for (String value : values) {
+            String clean = value.trim().replaceAll("^\"|\"$", "");
+            if (!clean.isEmpty()) {
+                parsedRow.add(clean);
+            }
+        }
+
+        if (!parsedRow.isEmpty()) {
+            result.add(parsedRow);
+        }
+    }
+
+    return result;
+}

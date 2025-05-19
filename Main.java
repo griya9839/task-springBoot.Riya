@@ -260,3 +260,33 @@ private static String[] buildHeader(List<String> common, List<String> extras) {
 
 }
 
+
+
+
+private static List<List<String>> parseNestedArray(String input) {
+    try {
+        if (input == null || input.trim().isEmpty() || input.equals("[]")) return new ArrayList<>();
+
+        input = input.trim();
+
+        // Fix: remove escaped outer quotes if present
+        if ((input.startsWith("\"[") && input.endsWith("]\"")) || 
+            (input.startsWith("'[") && input.endsWith("]'"))) {
+            input = input.substring(1, input.length() - 1);
+        }
+
+        // Handle flat arrays (e.g., ["Bucket", "Bucket"])
+        if (!input.contains("[[") && input.startsWith("[") && input.endsWith("]")) {
+            List<String> flat = objectMapper.readValue(input, new TypeReference<List<String>>() {});
+            List<List<String>> wrapped = new ArrayList<>();
+            wrapped.add(flat);
+            return wrapped;
+        }
+
+        // Handle nested arrays
+        return objectMapper.readValue(input, new TypeReference<List<List<String>>>() {});
+    } catch (Exception e) {
+        e.printStackTrace();
+        return new ArrayList<>();
+    }
+}

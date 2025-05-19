@@ -290,3 +290,43 @@ private static List<List<String>> parseNestedArray(String input) {
         return new ArrayList<>();
     }
 }
+
+
+
+
+private static List<List<String>> parseNestedArray(String input) {
+    List<List<String>> result = new ArrayList<>();
+
+    if (input == null || input.trim().isEmpty() || input.equals("[]")) {
+        return result;
+    }
+
+    input = input.trim();
+
+    // Remove outer quotes if present (e.g. "\"[1D,1W,2W]\"")
+    if (input.startsWith("\"") && input.endsWith("\"")) {
+        input = input.substring(1, input.length() - 1);
+    }
+
+    // Remove outer brackets if present
+    if (input.startsWith("[") && input.endsWith("]")) {
+        input = input.substring(1, input.length() - 1);
+    }
+
+    // Split on comma or whitespace
+    String[] tokens = input.split("[,\\s]+");
+
+    List<String> row = new ArrayList<>();
+    for (String token : tokens) {
+        String clean = token.trim().replaceAll("^\"|\"$", "");
+        if (!clean.isEmpty()) {
+            row.add(clean);
+        }
+    }
+
+    if (!row.isEmpty()) {
+        result.add(row); // wrap into one row (List<List<String>>)
+    }
+
+    return result;
+}

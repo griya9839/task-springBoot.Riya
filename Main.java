@@ -337,3 +337,14 @@ private static List<List<String>> parseNestedArray(String input) {
 private static String safe(List<String> list, int index) {
     return (list != null && index < list.size()) ? list.get(index).trim() : "";
 }
+
+
+
+
+
+System.out.println("FXDELTA.tenor raw: " + rs.getString("FXDELTA.tenor"));
+System.out.println("FXDELTA.value raw: " + rs.getString("FXDELTA.value"));
+System.out.println("FXDELTA.unit raw: " + rs.getString("FXDELTA.unit"));
+System.out.println("FXDELTA.risk_factor raw: " + rs.getString("FXDELTA.risk_factor"));
+System.out.println("FXDELTA.shift_type raw: " + rs.getString("FXDELTA.shift_type"));
+System.out.println("FXDELTA.greek raw: " + rs.getString("FXDELTA.greek"));

@@ -1,4 +1,4 @@
-// Main Class (Spring Boot Entry Point)
+i// Main Class (Spring Boot Entry Point)
 // Here’s the main Spring Boot application class:
 
 package com.example.xmlparser;
@@ -348,3 +348,47 @@ System.out.println("FXDELTA.unit raw: " + rs.getString("FXDELTA.unit"));
 System.out.println("FXDELTA.risk_factor raw: " + rs.getString("FXDELTA.risk_factor"));
 System.out.println("FXDELTA.shift_type raw: " + rs.getString("FXDELTA.shift_type"));
 System.out.println("FXDELTA.greek raw: " + rs.getString("FXDELTA.greek"));
+
+
+
+private static List<List<String>> parseNestedArray(String input) {
+    List<List<String>> result = new ArrayList<>();
+
+    if (input == null || input.trim().isEmpty() || input.equals("[]")) return result;
+
+    input = input.trim();
+
+    // Remove outer quotes
+    if (input.startsWith("\"") && input.endsWith("\"")) {
+        input = input.substring(1, input.length() - 1);
+    }
+
+    // Remove outer brackets
+    if (input.startsWith("[[") && input.endsWith("]]")) {
+        input = input.substring(2, input.length() - 2);
+    } else if (input.startsWith("[") && input.endsWith("]")) {
+        input = input.substring(1, input.length() - 1);
+    }
+
+    // Split rows on "],[" safely
+    String[] rows = input.split("\,\\s*\");
+
+    for (String row : rows) {
+        List<String> parsedRow = new ArrayList<>();
+
+        // remove any remaining quotes/brackets and preserve the original text
+        row = row.replaceAll("^\|\$", "").trim();
+
+        if (!row.isEmpty()) {
+            // Now split ONLY on true commas NOT inside phrases
+            // So we assume comma-separated values are valid
+            for (String val : row.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)")) {
+                parsedRow.add(val.trim().replaceAll("^\"|\"$", ""));
+            }
+        }
+
+        result.add(parsedRow);
+    }
+
+    return result;
+}

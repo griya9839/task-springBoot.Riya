@@ -392,3 +392,42 @@ private static List<List<String>> parseNestedArray(String input) {
 
     return result;
 }
+
+
+
+
+if (hasIRZ) {
+    List<List<String>> shifts = parseNestedArray(rs.getString("IRZCDELTA.shift_type"));
+    List<List<String>> risks = parseNestedArray(rs.getString("IRZCDELTA.risk_factor"));
+    List<List<String>> units = parseNestedArray(rs.getString("IRZCDELTA.unit"));
+    List<List<List<String>>> values = parseDoubleNestedArray(rs.getString("IRZCDELTA.value"));
+    List<List<List<String>>> tenors = parseDoubleNestedArray(rs.getString("IRZCDELTA.tenor"));
+
+    for (int i = 0; i < risks.size(); i++) {
+        List<String> riskList = risks.get(i);
+        List<String> shiftList = shifts.get(i);
+        List<String> unitOuter = units.size() > i ? units.get(i) : new ArrayList<>();
+        List<List<String>> valueOuter = values.size() > i ? values.get(i) : new ArrayList<>();
+        List<List<String>> tenorOuter = tenors.size() > i ? tenors.get(i) : new ArrayList<>();
+
+        for (int j = 0; j < riskList.size(); j++) {
+            String risk = safe(riskList, j);
+            String shift = safe(shiftList, j);
+            List<String> valueList = valueOuter.size() > j ? valueOuter.get(j) : new ArrayList<>();
+            List<String> tenorList = tenorOuter.size() > j ? tenorOuter.get(j) : new ArrayList<>();
+            List<String> unitList  = unitOuter.size()  > j ? unitOuter.get(j)  : new ArrayList<>();
+
+            int innerCount = Math.max(valueList.size(), tenorList.size());
+
+            for (int k = 0; k < innerCount; k++) {
+                List<String> row = new ArrayList<>(commonValues.values());
+                row.add(shift);
+                row.add(risk);
+                row.add(safe(unitList, k));
+                row.add(safe(valueList, k));
+                row.add(safe(tenorList, k));
+                irzPrinter.printRecord(row);
+            }
+        }
+    }
+}
